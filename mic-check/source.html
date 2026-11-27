@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>收音檢測 訊號產生器</title>
+<meta name="description" content="老師端：播放手機收音檢測用的標準測試音。">
+<link rel="icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header class="top">
+    <h1>訊號產生器（老師端）</h1>
+    <p>手機收音檢測 · 請在筆電上開啟這一頁</p>
+  </header>
+
+  <section class="card">
+    <h2>播放控制</h2>
+    <label class="field"><span>這一輪是</span>
+      <select id="roundLabel">
+        <option>A 回合（手機預設）</option>
+        <option>B 回合（關閉美化）</option>
+        <option>補測／重測</option>
+        <option>主畫面組加測 A</option>
+        <option>主畫面組加測 B</option>
+      </select>
+    </label>
+    <button class="big" id="playBtn">▶ 播放測試程序（約 30 秒）</button>
+    <button class="secondary" id="stopBtn" disabled>■ 停止</button>
+    <div class="status" id="playStatus"></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="progress"><div id="playProg"></div></div>
+    <p>現在：<span class="segment-now" id="nowSeg">—</span></p>
+
+    <h3>音量測試音</h3>
+    <p class="small">在學生做「3 收音檢查」時播放，用來調整筆電音量。</p>
+    <button class="secondary" id="toneBtn">播放 1000 Hz 持續音</button>
+
+    <h3>播放紀錄</h3>
+    <ul id="log" class="small"><li class="muted">尚未播放</li></ul>
+  </section>
+
+  <section class="card">
+    <h2>課前準備</h2>
+    <ol>
+      <li><strong>筆電接上電源</strong>。有些筆電用電池時會降低喇叭音量或改變音效。</li>
+      <li><strong>關閉喇叭音效增強。</strong>它會改變測試音，讓結果失準。
+        <ul class="small">
+          <li>Windows：設定 → 系統 → 音效 → 選擇喇叭 →「音訊增強」改成「關閉」；也關掉「響度等化」、Dolby、杜比全景聲、Waves MaxxAudio、B&amp;O 等廠商音效。</li>
+          <li>Mac：不需要設定。</li>
+          <li>Chromebook：不需要設定。</li>
+        </ul>
+      </li>
+      <li>關掉筆電的通知音，也關掉其他會發出聲音的分頁和程式。</li>
+      <li>用 Chrome、Edge 或 Safari 開這一頁。播放前先點一下頁面，瀏覽器才會允許發出聲音。</li>
+      <li>學生網址：<code id="studentUrl"></code>　可以投影下面的 QR code 讓學生掃描。
+        <div id="qr" style="margin:10px 0"></div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>上課流程（約 40 分鐘）</h2>
+    <ol>
+      <li><strong>（5 分）說明目的</strong>：手機為了講電話會自動「美化」聲音，我們要檢查能不能關掉。學生網頁的「我們要測什麼？」可以直接投影。</li>
+      <li><strong>（5 分）</strong>學生掃 QR code，用 <strong>Safari 或 Chrome</strong> 開啟（不要用 LINE 內建瀏覽器），完成步驟 1 填資料。</li>
+      <li><strong>（5 分）擺放</strong>：筆電放在教室中間的桌上，各組手機平放、底部朝筆電、距離約 30 公分，圍成半圓。手機多的話排第二圈（約 50 公分）。擺好後不再移動。
+        <div class="note small">筆電內建喇叭通常在鍵盤兩側或底部。如果在底部，把筆電放在硬桌面上，不要放在布或書上。</div>
+      </li>
+      <li><strong>（5 分）收音檢查</strong>：學生按「開始收音檢查」並允許麥克風。老師按「播放 1000 Hz 持續音」，然後調整筆電音量：
+        <ul>
+          <li>多數手機顯示「音量適中」即可，建議從 70% 開始調。</li>
+          <li>有手機顯示「太大聲」就調小；第二圈的手機顯示「太小聲」可以忽略，或請它們往前移。</li>
+          <li><strong>調好之後，整堂課都不要再改音量。</strong></li>
+        </ul>
+        學生按「結束收音檢查」。
+      </li>
+      <li><strong>（3 分）A 回合</strong>：請學生按「開始等待訊號」，確認每支手機都顯示「等待老師播放」，<strong>全班安靜</strong>，再按「播放測試程序」。手機會自動偵測開頭的嗶聲並錄音。</li>
+      <li><strong>（3 分）B 回合</strong>：同上。<strong>手機不要移動。</strong></li>
+      <li>有手機顯示「找不到提示音」或「訊號太小」時，讓那幾組把手機移近一點，<strong>A、B 都重做</strong>，再播放一次。其他已完成的手機不用理會。</li>
+      <li><strong>（可選）主畫面組</strong>：指定 2～3 組 iPhone，用 Safari 的「分享 → 加入主畫面」，從主畫面圖示開啟，A、B 各再測一次。</li>
+      <li><strong>（5 分）自由觀察</strong>：學生自己唱、吹口哨、敲音叉，比較 A、B 模式。</li>
+      <li><strong>（5 分）重播與上傳</strong>：步驟 7、8。至少要上傳結果檔（.json），並截圖備份。</li>
+    </ol>
+    <div class="note warn small">
+      <strong>上傳要先試過。</strong>手機上把檔案傳進 Google 雲端硬碟資料夾，有時會被要求安裝雲端硬碟 App。建議課前先用一支 iPhone 走一次步驟 8，確認可行；不行的話，就請學生用 AirDrop 或 LINE 把檔案傳給有筆電的同學，再由筆電上傳。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>測試程序內容</h2>
+    <div class="table-wrap"><table>
+      <tr><th>時間</th><th>內容</th><th>用途</th></tr>
+      <tr><td class="num">0–0.5 秒</td><td>2000 Hz 提示音</td><td>讓手機自動對準時間</td></tr>
+      <tr><td class="num">1.5–10.5 秒</td><td>1000 Hz，−12／−22／−32 dB 各 3 秒</td><td>① 檢查自動增益：每段應差 10 dB</td></tr>
+      <tr><td class="num">10.5–14.5 秒</td><td>安靜</td><td>③ 底噪是否被偷偷放大</td></tr>
+      <tr><td class="num">14.5–20.5 秒</td><td>440 Hz ＋ 8 個泛音（第 n 個泛音振幅 1/n）</td><td>② 泛音比例，以及持續音是否被降噪壓低</td></tr>
+      <tr><td class="num">21.5–27.5 秒</td><td>對數掃頻 200 → 12000 Hz</td><td>④ 比較 A、B 的頻率響應</td></tr>
+    </table></div>
+    <p><button class="secondary" id="dlWav">下載測試音 WAV 檔</button></p>
+    <p class="small muted">如果網頁播放有問題，可以下載 WAV 檔，用其他播放器播放，效果相同。</p>
+  </section>
+
+  <section class="card">
+    <h2>收集到的資料</h2>
+    <p>學生上傳的結果檔可以下載後拖進 <a href="aggregate.html">彙整頁</a>，一次看全班的結果。</p>
+  </section>
+</main>
+<script src="vendor/qrcode.js"></script>
+<script type="module" src="source.js"></script>
+</body>
+</html>

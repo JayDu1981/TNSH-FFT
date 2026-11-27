@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>手機收音檢測</title>
+<meta name="description" content="檢查手機麥克風收到的聲音有沒有被系統自動修改，作為樂器頻譜分析前的驗證。">
+<meta name="theme-color" content="#1f6feb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="收音檢測">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header class="top">
+    <h1>手機收音檢測</h1>
+    <p>聲音與樂器實驗 · 第一步驗證</p>
+  </header>
+
+  <div class="stickybar">
+    <nav class="pill-nav" id="nav">
+      <a href="#s-intro">說明</a>
+      <a href="#s-info" data-step="info">1 資料</a>
+      <a href="#s-place">2 擺放</a>
+      <a href="#s-mic" data-step="mic">3 收音檢查</a>
+      <a href="#s-A" data-step="A">4 A 回合</a>
+      <a href="#s-B" data-step="B">5 B 回合</a>
+      <a href="#s-free">6 自由觀察</a>
+      <a href="#s-play" data-step="play">7 重播</a>
+      <a href="#s-result" data-step="result">8 上傳</a>
+      <a href="#s-faq">問題排除</a>
+    </nav>
+  </div>
+
+  <!-- 說明 -->
+  <section class="card" id="s-intro">
+    <h2>我們要測什麼？</h2>
+    <p>手機的麥克風主要是為了<strong>講電話</strong>設計的，所以系統常常會自動「美化」聲音：</p>
+    <ul>
+      <li><strong>自動增益（AGC）</strong>：聲音小就自動放大、聲音大就自動壓小。</li>
+      <li><strong>降噪</strong>：把它認為是「噪音」的聲音壓掉。持續不變的聲音（像笛子的長音）常被當成噪音。</li>
+      <li><strong>回音消除</strong>：避免喇叭的聲音又被麥克風收進去。</li>
+    </ul>
+    <p>講電話時這些很好用，但我們要用 FFT 分析樂器的<strong>基頻與泛音強度</strong>，如果聲音先被改過，分析結果就不可信。</p>
+    <p>這次每支手機都會用兩種方式收音，聽老師筆電播出的<strong>同一段標準聲音</strong>：</p>
+    <ul>
+      <li><strong>A 模式</strong>：手機預設的收音方式（美化功能開著）。</li>
+      <li><strong>B 模式</strong>：網頁要求手機把美化功能全部關掉。</li>
+    </ul>
+    <p>我們想知道：<strong>B 模式下，手機是不是真的照做？</strong>這決定了之後的頻譜分析工具能不能直接做成網頁。</p>
+    <div class="note">
+      <strong>整個流程大約 20 分鐘。</strong>每組只需要一支手機。照著下面 1 → 8 的步驟做，老師會告訴大家什麼時候播放聲音。
+    </div>
+    <details>
+      <summary>想多了解：這其實是在「校正量測儀器」</summary>
+      <p>任何測量之前，都要先確認儀器本身可不可信。我們用「已知答案」的聲音來測手機：</p>
+      <ul>
+        <li>① <strong>音量階梯</strong>：1000 Hz 的聲音，每 3 秒變小 10 dB。忠實的麥克風應該也量到每段差 10 dB。</li>
+        <li>② <strong>複合音</strong>：440 Hz 加上 8 個泛音，持續 6 秒。如果音量隨時間被壓低，代表降噪在作用。</li>
+        <li>③ <strong>安靜段</strong>：4 秒安靜。如果底噪越來越大聲，代表自動增益在偷偷放大。</li>
+        <li>④ <strong>掃頻</strong>：頻率從 200 Hz 一路升到 12000 Hz，用來比較 A、B 兩種模式在不同頻率的差別。</li>
+      </ul>
+      <p class="small muted">dB（分貝）是比值的對數單位：差 10 dB 代表功率差 10 倍、振幅差約 3.16 倍。</p>
+    </details>
+  </section>
+
+  <!-- 1 資料 -->
+  <section class="card" id="s-info">
+    <h2><span class="step-no">1</span>填寫基本資料</h2>
+    <label class="field"><span>組別</span>
+      <input type="number" id="group" inputmode="numeric" min="1" max="99" placeholder="例如 3">
+    </label>
+    <label class="field"><span>手機型號</span>
+      <input type="text" id="model" placeholder="例如 iPhone 13、Samsung A54">
+    </label>
+    <p class="small muted">不知道型號？iPhone：設定 → 一般 → 關於本機 → 機型名稱。Android：設定 → 關於手機。</p>
+    <label class="field"><span>你用什麼開這個網頁？</span>
+      <select id="browser">
+        <option value="">請選擇</option>
+        <option>Safari</option>
+        <option>Chrome</option>
+        <option>LINE 內建瀏覽器</option>
+        <option>其他</option>
+      </select>
+    </label>
+    <div class="note warn small hidden" id="lineWarn">LINE 內建瀏覽器常常無法使用麥克風。請點右上角選單，改用「Safari」或「Chrome」開啟。</div>
+    <h3>系統自動偵測到的資訊</h3>
+    <dl class="kv" id="deviceInfo"></dl>
+  </section>
+
+  <!-- 2 擺放 -->
+  <section class="card" id="s-place">
+    <h2><span class="step-no">2</span>擺放手機</h2>
+    <ol>
+      <li>把手機<strong>平放在桌上</strong>，螢幕朝上，不要拿在手上（手會晃、也會擋住聲音）。</li>
+      <li>手機<strong>底部（充電孔那一端）朝向老師的筆電</strong>，距離約 <strong>30 公分</strong>（大約一張 A4 紙的長邊）。</li>
+      <li>擺好後就<strong>不要再移動</strong>。A、B 兩個回合一定要在同一個位置測，比較才有意義。</li>
+      <li>拔掉耳機、關掉藍牙耳機（否則可能會用耳機的麥克風收音）。</li>
+      <li>手機保持亮螢幕，不要切到別的 App。</li>
+    </ol>
+    <div class="note">
+      播放測試音時，<strong>全班請保持安靜</strong>，尤其是中間 4 秒的安靜段。
+    </div>
+  </section>
+
+  <!-- 3 收音檢查 -->
+  <section class="card" id="s-mic">
+    <h2><span class="step-no">3</span>允許麥克風與收音檢查</h2>
+    <p>按下按鈕後，手機會問你「是否允許使用麥克風」，請選<strong>允許</strong>。</p>
+    <button class="big" id="micCheckBtn">開始收音檢查</button>
+    <div class="status" id="micStatus"></div>
+    <div id="micLive" class="hidden">
+      <p class="small">老師播放「音量測試音」（1000 Hz 持續音）時，看下面的 1000 Hz 音量：</p>
+      <div class="meter"><div id="micMeter"></div></div>
+      <p><span id="micLevel">—</span></p>
+      <canvas class="spec" id="micSpec"></canvas>
+      <button class="secondary" id="micStopBtn">結束收音檢查</button>
+    </div>
+  </section>
+
+  <!-- 4 A 回合 -->
+  <section class="card" id="s-A">
+    <h2><span class="step-no">4</span>A 回合：手機預設收音</h2>
+    <ol>
+      <li>確認手機已經擺好、沒有移動。</li>
+      <li>按「開始等待訊號」。</li>
+      <li>老師播放測試音。手機聽到開頭的「嗶」聲後會<strong>自動開始錄音</strong>，約 28 秒後自動結束。</li>
+      <li>錄音時不要碰手機、保持安靜。</li>
+    </ol>
+    <div data-round="A"></div>
+  </section>
+
+  <!-- 5 B 回合 -->
+  <section class="card" id="s-B">
+    <h2><span class="step-no">5</span>B 回合：要求關閉美化功能</h2>
+    <p>步驟和 A 回合完全一樣，手機也<strong>不要移動</strong>。等老師再播放一次。</p>
+    <div data-round="B"></div>
+  </section>
+
+  <!-- 6 自由觀察 -->
+  <section class="card" id="s-free">
+    <h2><span class="step-no">6</span>自由觀察（老師說可以再做）</h2>
+    <p>這是即時頻譜。可以試試看：</p>
+    <ul>
+      <li>敲音叉、吹口哨、用穩定的聲音唱「啊——」。</li>
+      <li>同一個聲音，切換 A、B 模式，頻譜看起來有什麼不同？</li>
+      <li>持續唱同一個音 5 秒以上，A 模式下泛音會不會慢慢變小？</li>
+    </ul>
+    <div class="row">
+      <button id="freeA">用 A 模式觀察</button>
+      <button id="freeB">用 B 模式觀察</button>
+      <button class="secondary" id="freeStop" disabled>停止</button>
+    </div>
+    <div class="status" id="freeStatus"></div>
+    <canvas class="spec" id="freeSpec"></canvas>
+    <p class="small muted">畫面上的數字是目前最強的頻率。橫軸是頻率（對數刻度），縱軸是音量（dB）。</p>
+    <label class="field"><span>觀察紀錄（寫下你看到的差別）</span>
+      <textarea id="freeNotes" placeholder="例如：A 模式唱長音時，高頻的泛音過 2 秒後就變小了；B 模式比較穩定。"></textarea>
+    </label>
+  </section>
+
+  <!-- 7 重播 -->
+  <section class="card" id="s-play">
+    <h2><span class="step-no">7</span>重播與存檔測試</h2>
+    <p>確認錄下來的聲音能重播、能存檔（以後做樂器實驗時會需要）。</p>
+    <div class="note warn small">iPhone 如果聽不到聲音：檢查側邊的<strong>靜音開關</strong>，並把音量調大。</div>
+    <div id="playArea"><p class="muted">完成 A、B 回合後，這裡會出現錄音。</p></div>
+    <h3>請勾選實際結果</h3>
+    <label class="check"><input type="checkbox" id="chkPlayA"><span>A 回合的錄音可以重播，聽得到聲音</span></label>
+    <label class="check"><input type="checkbox" id="chkPlayB"><span>B 回合的錄音可以重播，聽得到聲音</span></label>
+    <label class="check"><input type="checkbox" id="chkSave"><span>錄音檔可以儲存或分享出去</span></label>
+  </section>
+
+  <!-- 8 結果 -->
+  <section class="card" id="s-result">
+    <h2><span class="step-no">8</span>結果與上傳</h2>
+    <div id="resultArea"><p class="muted">完成 A、B 兩個回合後，這裡會出現比較結果。</p></div>
+    <label class="field"><span>其他狀況或備註（例如：錄音中有人講話、手機被碰到、跳出通知）</span>
+      <textarea id="notes"></textarea>
+    </label>
+    <h3>上傳步驟</h3>
+    <ol>
+      <li><strong>先截圖</strong>這一區的結果，這是最基本的備份。</li>
+      <li>按「儲存結果檔」，把結果檔（.json）存到手機。iPhone 會跳出分享選單，選「<strong>儲存到檔案</strong>」。</li>
+      <li>按「開啟上傳資料夾」，用學校的 Google 帳號登入，把結果檔上傳進去。</li>
+      <li>如果還有時間，也請上傳 A、B 兩個錄音檔（各約 3 MB），老師可以拿來再仔細分析。</li>
+    </ol>
+    <div class="row">
+      <button id="saveJson" disabled>儲存結果檔</button>
+      <button class="secondary" id="saveWavA" disabled>儲存 A 錄音檔</button>
+      <button class="secondary" id="saveWavB" disabled>儲存 B 錄音檔</button>
+    </div>
+    <div class="row">
+      <a class="btn" id="uploadLink" target="_blank" rel="noopener">開啟上傳資料夾</a>
+    </div>
+    <p class="small muted">如果上傳不成功：把結果檔用 AirDrop 或 LINE 傳給同組有筆電的同學或老師，再由他上傳。檔名已經包含組別和手機型號，不用改名。</p>
+    <details>
+      <summary>重新開始（清除這支手機上的紀錄）</summary>
+      <p class="small">只有在換另一支手機、或老師要求重測時才需要。</p>
+      <button class="danger" id="resetAll">清除並重新開始</button>
+    </details>
+  </section>
+
+  <!-- 問題排除 -->
+  <section class="card" id="s-faq">
+    <h2>問題排除</h2>
+    <details><summary>按了按鈕，沒有問我要不要允許麥克風</summary>
+      <ul>
+        <li>確認不是用 LINE、Instagram 等 App 內建的瀏覽器開啟。請改用 Safari 或 Chrome。</li>
+        <li>iPhone：設定 → Safari → 麥克風，改成「詢問」或「允許」。</li>
+        <li>Android Chrome：點網址列左邊的圖示 → 權限 → 麥克風 → 允許。</li>
+      </ul>
+    </details>
+    <details><summary>一直顯示「等待訊號」，老師播完了也沒開始錄</summary>
+      <ul>
+        <li>手機可能離喇叭太遠，或喇叭音量太小。靠近一點（但 A、B 要同位置），請老師再播一次。</li>
+        <li>確認手機沒有被蓋住、底部朝向喇叭。</li>
+      </ul>
+    </details>
+    <details><summary>結果顯示「訊號太小」或「爆音」</summary>
+      <p>請老師調整筆電音量，或調整手機距離，然後按該回合的「重做這一回合」。A、B 兩回合要在一樣的條件下做，所以如果改了距離，兩回合都要重做。</p>
+    </details>
+    <details><summary>不小心重新整理或關掉網頁了</summary>
+      <p>分析結果會留在這支手機上，重新打開網頁就會看到。但<strong>錄音檔不會保留</strong>，如果需要錄音檔，就要重做那一回合。</p>
+    </details>
+    <details><summary>要把這個網頁「加入主畫面」嗎？</summary>
+      <p>只有老師指定的組別需要。iPhone 用 Safari：按下方「分享」→「加入主畫面」，再從主畫面的圖示打開，從步驟 1 重新做一次。這是在測試「網頁加入主畫面後」收音是否一樣正常。</p>
+    </details>
+  </section>
+
+  <p class="small muted" style="text-align:center">這個網頁不會上傳任何資料，所有錄音與分析都只在你的手機上進行。</p>
+</main>
+
+<template id="roundTpl">
+  <button class="big" data-act="start">開始等待訊號</button>
+  <div class="row">
+    <button class="secondary hidden" data-act="cancel">取消</button>
+    <button class="secondary hidden" data-act="redo">重做這一回合</button>
+  </div>
+  <div class="status" data-el="status"></div>
+  <div class="hidden" data-el="live">
+    <p class="small">現在播放：<span class="segment-now" data-el="seg">—</span></p>
+    <div class="progress"><div data-el="prog"></div></div>
+    <canvas class="spec" data-el="spec"></canvas>
+  </div>
+  <div data-el="summary"></div>
+</template>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

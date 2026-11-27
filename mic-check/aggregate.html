@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>收音檢測 結果彙整</title>
+<meta name="description" content="老師端：彙整全班手機收音檢測的結果檔。">
+<link rel="icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+<style>
+  main { max-width: 1200px; }
+  .drop { border: 2px dashed var(--line); border-radius: 14px; padding: 28px 16px; text-align: center; }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  td, th { font-size: .85rem; }
+  .sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .sum div { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+  .sum b { display: block; font-size: 1.4rem; }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <h1>結果彙整（老師端）</h1>
+    <p>把學生上傳的 <code>_result.json</code> 檔拖進來，資料只在這台電腦上處理，不會上傳。</p>
+  </header>
+
+  <section class="card">
+    <div class="drop" id="drop">
+      <p>把結果檔拖到這裡，或</p>
+      <label class="btn">選擇檔案<input type="file" id="files" accept=".json,application/json" multiple hidden></label>
+      <p class="small muted">從 Google 雲端硬碟資料夾全選下載後會得到 zip 檔，先解壓縮，再把所有 .json 一起選進來。</p>
+    </div>
+  </section>
+
+  <section class="card hidden" id="summaryCard">
+    <h2>總覽</h2>
+    <div class="sum" id="summary"></div>
+    <div id="conclusion"></div>
+  </section>
+
+  <section class="card hidden" id="tableCard">
+    <h2>每支手機</h2>
+    <div class="row"><button class="secondary" id="csvBtn">下載 CSV（可用 Excel 開啟）</button></div>
+    <div class="table-wrap"><table id="table"></table></div>
+    <p class="small muted">判定欄：✓ 沒發現被修改、✗ 有被修改的跡象、? 無法判斷（訊號太小或太吵）。數值依序為：音量階梯兩段差（應約 10）、自動回彈最大值、底噪變化、持續音衰減，單位都是 dB。</p>
+  </section>
+
+  <section class="card hidden" id="chartCard">
+    <h2>B 模式減 A 模式的頻率響應差（每支手機一條線）</h2>
+    <p class="small muted">0 dB 代表兩種模式一樣。偏離越多，代表 A 模式的處理對音色影響越大。</p>
+    <canvas class="chart" id="diffChart" style="height:280px"></canvas>
+  </section>
+</main>
+<script type="module" src="aggregate.js"></script>
+</body>
+</html>
